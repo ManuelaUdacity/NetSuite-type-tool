@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Item Type Classification Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .question {
+      margin-bottom: 15px;
+    }
+    button {
+      margin: 10px 0;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #result {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 20px;
+      color: green;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Item Type Classification Tool</h1>
+  <form id="questionnaire">
+    <div id="questions-container"></div>
+    <button type="button" onclick="submitAnswers()">Submit</button>
+  </form>
+  <div id="result" class="hidden"></div>
+  <button id="restart" class="hidden" onclick="restartQuestionnaire()">Start Again</button>
+
+  <script>
+    const questions = [
+      {
+        question: "Do you sell this item exactly as you purchase it?",
+        ifYes: "Inventory Item",
+        ifNo: "next"
+      },
+      {
+        question: "Does this item need to be combined with other items to create a new product?",
+        ifYes: "Assembly Item",
+        ifNo: "Inventory Item"
+      },
+      {
+        question: "Do you need to track the individual components used in the product?",
+        ifYes: "Assembly Item",
+        ifNo: "Inventory Item"
+      },
+      {
+        question: "Does the stock level of the individual components affect the availability of this product?",
+        ifYes: "Assembly Item",
+        ifNo: "Inventory Item"
+      },
+      {
+        question: "Is this item manufactured or assembled in-house?",
+        ifYes: "Assembly Item",
+        ifNo: "Inventory Item"
+      },
+      {
+        question: "Do you need to track the cost of components separately from the finished product?",
+        ifYes: "Assembly Item",
+        ifNo: "Inventory Item"
+      },
+      {
+        question: "Is the product a kit or bundle sold as a single unit?",
+        ifYes: "Assembly Item",
+        ifNo: "Inventory Item"
+      },
+      {
+        question: "Do you want to handle stock replenishment at the component level?",
+        ifYes: "Assembly Item",
+        ifNo: "Inventory Item"
+      }
+    ];
+
+    const container = document.getElementById('questions-container');
+    const resultDiv = document.getElementById('result');
+    const restartButton = document.getElementById('restart');
+
+    function loadQuestions() {
+      container.innerHTML = '';
+      questions.forEach((q, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question';
+
+        const label = document.createElement('label');
+        label.textContent = q.question;
+        label.htmlFor = `question-${index}`;
+        questionDiv.appendChild(label);
+
+        const yesInput = document.createElement('input');
+        yesInput.type = 'radio';
+        yesInput.name = `question-${index}`;
+        yesInput.value = 'yes';
+        yesInput.id = `question-${index}-yes`;
+        
+        const yesLabel = document.createElement('label');
+        yesLabel.textContent = 'Yes';
+        yesLabel.htmlFor = `question-${index}-yes`;
+        
+        const noInput = document.createElement('input');
+        noInput.type = 'radio';
+        noInput.name = `question-${index}`;
+        noInput.value = 'no';
+        noInput.id = `question-${index}-no`;
+
+        const noLabel = document.createElement('label');
+        noLabel.textContent = 'No';
+        noLabel.htmlFor = `question-${index}-no`;
+
+        questionDiv.appendChild(yesInput);
+        questionDiv.appendChild(yesLabel);
+        questionDiv.appendChild(noInput);
+        questionDiv.appendChild(noLabel);
+
+        container.appendChild(questionDiv);
+      });
+    }
+
+    function submitAnswers() {
+      const answers = [];
+      let result = '';
+
+      questions.forEach((q, index) => {
+        const selected = document.querySelector(`input[name='question-${index}']:checked`);
+        if (selected) {
+          answers.push(selected.value);
+        } else {
+          answers.push(null);
+        }
+      });
+
+      for (let i = 0; i < questions.length; i++) {
+        if (answers[i] === 'yes') {
+          if (questions[i].ifYes === 'Inventory Item' || questions[i].ifYes === 'Assembly Item') {
+            result = questions[i].ifYes;
+            break;
+          }
+        } else if (answers[i] === 'no') {
+          if (questions[i].ifNo === 'Inventory Item' || questions[i].ifNo === 'Assembly Item') {
+            result = questions[i].ifNo;
+            break;
+          }
+        }
+      }
+
+      if (!result) {
+        result = 'Unable to classify item based on provided answers.';
+      }
+
+      resultDiv.textContent = `Classification: ${result}`;
+      resultDiv.classList.remove('hidden');
+      restartButton.classList.remove('hidden');
+    }
+
+    function restartQuestionnaire() {
+      resultDiv.classList.add('hidden');
+      restartButton.classList.add('hidden');
+      loadQuestions();
+    }
+
+    // Load questions on page load
+    loadQuestions();
+  </script>
+</body>
+</html>
